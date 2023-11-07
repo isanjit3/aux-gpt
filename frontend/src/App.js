@@ -20,6 +20,25 @@ function App() {
   const [userInput, setUserInput] = useState('');
   const [isPlaying, setIsPlaying] = useState(false);
 
+  useEffect(() => {
+    const fetchPlaybackState = async () => {
+      try {
+        const response = await axios.get('https://api.spotify.com/v1/me/player', {
+          headers: {
+            'Authorization': `Bearer ${authToken}`
+          }
+        });
+        if (response.data && response.data.is_playing !== undefined) {
+          setIsPlaying(response.data.is_playing);
+        }
+      } catch (error) {
+        console.error('Error fetching playback state:', error);
+      }
+    };
+
+    fetchPlaybackState();
+  }, [authToken]);
+
   // Check for an existing auth token when the app loads
   useEffect(() => {
     // Function to parse the hash from the URL
