@@ -60,6 +60,7 @@ function App() {
       console.error('Error toggling play/pause', error);
     });
   };
+
   // Handler to skip to the next track
   const handleSkipNext = () => {
     console.log('Skip next clicked')
@@ -75,6 +76,7 @@ function App() {
       console.error('Error skipping to next track', error);
     });
   };
+
   // Handler to skip to the previous track
   const handleSkipPrevious = () => {
     console.log('Skip previous clicked')
@@ -90,16 +92,20 @@ function App() {
       console.error('Error skipping to previous track', error);
     });
   };
+
   const handleScrub = (e) => {
     console.log('Song scrubbed')
-    const newPositionMs = 1000/* calculate position in milliseconds based on scrubber value */;
+    const newPositionMs = e;
     axios.put(`https://api.spotify.com/v1/me/player/seek?position_ms=${newPositionMs}`, {}, {
       headers: {
         'Authorization': `Bearer ${authToken}`
       }
     })
     .then(response => {
-      // Update your state accordingly
+      setCurrentTrack({
+        ...currentTrack,
+        progressMs: newPositionMs
+      });
     })
     .catch(error => {
       console.error('Error seeking to position', error);
@@ -133,8 +139,9 @@ function App() {
         setCurrentTrack({
           songTitle: response.data.item.name,
           artist: response.data.item.artists.map(artist => artist.name).join(', '),
-          albumImageUrl: response.data.item.album.images[2].url, // 2 for the smaller one
-          progressMs: response.data.progress_ms
+          albumImageUrl: response.data.item.album.images[1].url, // 2 for the smaller one
+          progressMs: response.data.progress_ms,
+          durationMs: response.data.item.duration_ms
         });
       }
     } catch (error) {
@@ -160,7 +167,7 @@ function App() {
         <>
           <Player
             currentTrack={currentTrack}
-            Scrub={handleScrub}
+            onScrub={handleScrub}
             onPlayPause={handlePlayPause}
             onSkipNext={handleSkipNext}
             onSkipPrevious={handleSkipPrevious}
