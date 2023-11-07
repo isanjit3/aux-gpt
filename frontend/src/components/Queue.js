@@ -1,6 +1,9 @@
 import React from 'react';
 
 function Queue({ queue }) {
+
+  console.log(queue)
+
   return (
     <ul>
       {queue.map((track, index) => (

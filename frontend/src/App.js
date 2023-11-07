@@ -9,6 +9,8 @@ import Player from './components/Player';
 import Queue from './components/Queue';
 import ChatBox from './components/ChatBox';
 
+const INTERVAL = 1000;
+
 
 function App() {
   const [authToken, setAuthToken] = useState(null);
@@ -149,15 +151,41 @@ function App() {
     }
   };
 
-  // Fetch the queue when the app loads
+  // Fetch the song when the app loads
   useEffect(() => {
     if (authToken) {
       const interval = setInterval(() => {
         fetchCurrentPlaying();
-      }, 2000);
+      }, INTERVAL);
       return () => clearInterval(interval);
     }
   }, [authToken]);
+
+  // Function to fetch the user's queue from Spotify
+  const fetchQueue = async () => {
+    try {
+      const response = await axios.get('https://api.spotify.com/v1/me/player/queue', {
+        headers: {
+          'Authorization': `Bearer ${authToken}`
+        }
+      });
+      // Update the local queue state with the fetched queue
+      setQueue(response.data.queue);
+    } catch (error) {
+      console.error('Error fetching queue:', error);
+    }
+  };
+
+  // Fetch the song when the app loads
+  useEffect(() => {
+    if (authToken) {
+      const interval = setInterval(() => {
+        fetchQueue();
+      }, INTERVAL);
+      return () => clearInterval(interval);
+    }
+  }, [authToken]);
+
 
   return (
     <div>
@@ -172,8 +200,8 @@ function App() {
             onSkipNext={handleSkipNext}
             onSkipPrevious={handleSkipPrevious}
           />
-          <Queue queue={queue} />
           <ChatBox onSubmitPrompt={handleSubmitPrompt} />
+          <Queue queue={queue} />
         </>
       )}
     </div>
