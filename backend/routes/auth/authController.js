@@ -3,12 +3,21 @@ const querystring = require('querystring');
 require('dotenv').config();
 
 const login = (req, res) => {
-  const scope = 'user-read-private user-read-email';
+  const SCOPE = [
+    'user-read-private',
+    'user-read-email',
+    'user-read-playback-state',
+    'user-modify-playback-state',
+    'user-read-currently-playing',
+    'playlist-read-private',
+    'playlist-read-collaborative',
+    'streaming'
+  ].join(' ');
   res.redirect('https://accounts.spotify.com/authorize?' +
     querystring.stringify({
       response_type: 'code',
       client_id: process.env.SPOTIFY_CLIENT_ID,
-      scope: scope,
+      scope: SCOPE,
       redirect_uri: process.env.REDIRECT_URI,
     }));
 };

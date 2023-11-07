@@ -13,48 +13,115 @@ import ChatBox from './components/ChatBox';
 function App() {
   const [authToken, setAuthToken] = useState(null);
   const [currentTrack, setCurrentTrack] = useState({});
+  // const [currentPlaybackInfo, setCurrentPlaybackInfo] = useState(null); // Can remove this I think -- using currentTrack hook
   const [queue, setQueue] = useState([]);
   const [userInput, setUserInput] = useState('');
 
   // Check for an existing auth token when the app loads
   useEffect(() => {
-    const token = localStorage.getItem('authToken');
-    console.log('Auth Token Set: ', token)
-    setAuthToken(token);
+    // Function to parse the hash from the URL
+    const parseHash = (hash) => {
+      return hash.substring(1).split('&').reduce((initial, item) => {
+        if (item) {
+          let parts = item.split('=');
+          initial[parts[0]] = decodeURIComponent(parts[1]);
+        }
+        return initial;
+      }, {});
+    };
+  
+    // Parse the hash from the URL
+    const hash = parseHash(window.location.hash);
+    const token = hash.access_token;
+  
+    if (token) {
+      // Save the token in local storage and update the state
+      localStorage.setItem('authToken', token);
+      setAuthToken(token);
+      console.log(`Access Token Set: ${token}`)
+      window.history.pushState("", document.title, window.location.pathname);
+    }
   }, []);
-
+  
   // Handlers for the Player component
   const handlePlayPause = () => {
-    // Call Spotify API to play/pause the music
+    const isPlaying = true/* logic to determine if the song is currently playing */;
+    axios.put(`https://api.spotify.com/v1/me/player/${isPlaying ? 'pause' : 'play'}`, {}, {
+      headers: {
+        'Authorization': `Bearer ${authToken}`
+      }
+    })
+    .then(response => {
+      // Update your state accordingly
+    })
+    .catch(error => {
+      console.error('Error toggling play/pause', error);
+    });
   };
-
   const handleSkipNext = () => {
     // Call Spotify API to skip to the next track
   };
-
   const handleSkipPrevious = () => {
     // Call Spotify API to skip to the previous track
   };
-
   const handleScrub = (e) => {
-    // Call Spotify API to seek to the position in the song
+    const newPositionMs = 1000/* calculate position in milliseconds based on scrubber value */;
+    axios.put(`https://api.spotify.com/v1/me/player/seek?position_ms=${newPositionMs}`, {}, {
+      headers: {
+        'Authorization': `Bearer ${authToken}`
+      }
+    })
+    .then(response => {
+      // Update your state accordingly
+    })
+    .catch(error => {
+      console.error('Error seeking to position', error);
+    });
   };
-
   // Handler for the ChatBox component
   const handleSubmitPrompt = (prompt) => {
-    setUserInput(prompt);
-    // Call your backend API to process the prompt and update the queue
+    axios.post('http://localhost:3001/api/queue', { prompt }, {
+      headers: {
+        'Authorization': `Bearer ${authToken}`
+      }
+    })
+    .then(response => {
+      // Update your queue state with the new songs
+      setQueue(response.data.queue);
+    })
+    .catch(error => {
+      console.error('Error submitting prompt', error);
+    });
   };
 
-  // Fetch current playing song and queue from Spotify
-  const fetchCurrentPlaying = () => {
-    // Use axios to call your backend, which will then call Spotify's API
+  // Utility function to fetch the current playing track
+  const fetchCurrentPlaying = async () => {
+    try {
+      const response = await axios.get('https://api.spotify.com/v1/me/player/currently-playing', {
+        headers: {
+          'Authorization': `Bearer ${authToken}`
+        }
+      });
+      if (response.data) {
+        setCurrentTrack({
+          songTitle: response.data.item.name,
+          artist: response.data.item.artists.map(artist => artist.name).join(', '),
+          albumImageUrl: response.data.item.album.images[2].url, // 2 for the smaller one
+          progressMs: response.data.progress_ms
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching current playing track:', error);
+    }
   };
 
   // Fetch the queue when the app loads
   useEffect(() => {
     if (authToken) {
-      fetchCurrentPlaying();
+      const interval = setInterval(() => {
+        fetchCurrentPlaying();
+      }, 2000);
+      return () => clearInterval(interval);
     }
   }, [authToken]);
 
