@@ -1,7 +1,6 @@
 import { searchForTrack } from './searchForTrack';
 
 const OpenAI = require('openai-api');
-console.log(process.env)
 const openai = new OpenAI(process.env.REACT_APP_OPENAI_SECRET);
 
 

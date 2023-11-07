@@ -30,22 +30,24 @@ function App() {
   const [isPlaying, setIsPlaying] = useState(false);
 
   useEffect(() => {
-    const fetchPlaybackState = async () => {
-      try {
-        const response = await axios.get('https://api.spotify.com/v1/me/player', {
-          headers: {
-            'Authorization': `Bearer ${authToken}`
+    if (authToken) {
+      const fetchPlaybackState = async () => {
+        try {
+          const response = await axios.get('https://api.spotify.com/v1/me/player', {
+            headers: {
+              'Authorization': `Bearer ${authToken}`
+            }
+          });
+          if (response.data && response.data.is_playing !== undefined) {
+            setIsPlaying(response.data.is_playing);
           }
-        });
-        if (response.data && response.data.is_playing !== undefined) {
-          setIsPlaying(response.data.is_playing);
+        } catch (error) {
+          console.error('Error fetching playback state:', error);
         }
-      } catch (error) {
-        console.error('Error fetching playback state:', error);
-      }
-    };
+      };
 
-    fetchPlaybackState();
+      fetchPlaybackState();
+    }
   }, [authToken]);
 
   // Check for an existing auth token when the app loads
@@ -60,11 +62,11 @@ function App() {
         return initial;
       }, {});
     };
-  
+
     // Parse the hash from the URL
     const hash = parseHash(window.location.hash);
     const token = hash.access_token;
-  
+
     if (token) {
       // Save the token in local storage and update the state
       localStorage.setItem('authToken', token);
@@ -73,7 +75,7 @@ function App() {
       window.history.pushState("", document.title, window.location.pathname);
     }
   }, []);
-  
+
   // Handlers for the Player component
   // Handler to toggle play/pause
   const handlePlayPause = () => {
@@ -83,12 +85,12 @@ function App() {
         'Authorization': `Bearer ${authToken}`
       }
     })
-    .then(response => {
-      setIsPlaying(!isPlaying); // Toggle the playing state
-    })
-    .catch(error => {
-      console.error('Error toggling play/pause', error);
-    });
+      .then(response => {
+        setIsPlaying(!isPlaying); // Toggle the playing state
+      })
+      .catch(error => {
+        console.error('Error toggling play/pause', error);
+      });
   };
 
   // Handler to skip to the next track
@@ -99,12 +101,12 @@ function App() {
         'Authorization': `Bearer ${authToken}`
       }
     })
-    .then(response => {
-      fetchCurrentPlaying(setCurrentTrack, authToken); // Fetch the new current playing track
-    })
-    .catch(error => {
-      console.error('Error skipping to next track', error);
-    });
+      .then(response => {
+        fetchCurrentPlaying(setCurrentTrack, authToken); // Fetch the new current playing track
+      })
+      .catch(error => {
+        console.error('Error skipping to next track', error);
+      });
   };
 
   // Handler to skip to the previous track
@@ -115,12 +117,12 @@ function App() {
         'Authorization': `Bearer ${authToken}`
       }
     })
-    .then(response => {
-      fetchCurrentPlaying(setCurrentTrack, authToken); // Fetch the new current playing track
-    })
-    .catch(error => {
-      console.error('Error skipping to previous track', error);
-    });
+      .then(response => {
+        fetchCurrentPlaying(setCurrentTrack, authToken); // Fetch the new current playing track
+      })
+      .catch(error => {
+        console.error('Error skipping to previous track', error);
+      });
   };
 
   const handleScrub = (e) => {
@@ -131,15 +133,15 @@ function App() {
         'Authorization': `Bearer ${authToken}`
       }
     })
-    .then(response => {
-      setCurrentTrack({
-        ...currentTrack,
-        progressMs: newPositionMs
+      .then(response => {
+        setCurrentTrack({
+          ...currentTrack,
+          progressMs: newPositionMs
+        });
+      })
+      .catch(error => {
+        console.error('Error seeking to position', error);
       });
-    })
-    .catch(error => {
-      console.error('Error seeking to position', error);
-    });
   };
 
 
