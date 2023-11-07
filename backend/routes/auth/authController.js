@@ -1,8 +1,9 @@
 const axios = require('axios');
 const querystring = require('querystring');
-require('dotenv').config();
 
 const login = (req, res) => {
+  console.log('ACCESSING USER SCOPES');
+  // user permissions to request
   const SCOPE = [
     'user-read-private',
     'user-read-email',
