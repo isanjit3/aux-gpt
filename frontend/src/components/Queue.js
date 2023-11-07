@@ -9,7 +9,10 @@ function Queue({ queue }) {
     <ul>
       {displayQueue.map((track, index) => (
         <li key={index}>
-          {track.name} by {track.artists.map((artist) => artist.name).join(', ')}
+          {track && track.name ? track.name : 'Unknown Track'} by 
+          {track && track.artists 
+            ? track.artists.map((artist) => artist.name).join(', ') 
+            : 'Unknown Artist'}
         </li>
       ))}
     </ul>

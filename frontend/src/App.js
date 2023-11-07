@@ -15,10 +15,10 @@ import { fetchQueue } from './utils/fetchQueue';
 import { searchForTrack } from './utils/searchForTrack';
 import { addToQueue } from './utils/addToQueue';
 import { clearQueue } from './utils/clearQueue';
-import { interpretComplexQuery, parseInterpretedText } from './utils/interpretComplexQuery';
+import { interpretComplexQuery } from './utils/interpretComplexQuery';
 
 
-const INTERVAL = 500;
+const INTERVAL = 100;
 
 
 function App() {
@@ -111,8 +111,6 @@ function App() {
       console.error('Error toggling play/pause', error);
     }
   };
-  
-  
 
   // Handler to skip to the next track
   const handleSkipNext = () => {
@@ -165,7 +163,6 @@ function App() {
       });
   };
 
-
   // Fetch the song when the app loads
   useEffect(() => {
     if (authToken) {
@@ -176,7 +173,7 @@ function App() {
     }
   }, [authToken]);
 
-  // Fetch the song when the app loads
+  // Fetch the queue when the app loads
   useEffect(() => {
     if (authToken) {
       const interval = setInterval(() => {
@@ -186,7 +183,6 @@ function App() {
     }
   }, [authToken]);
 
-
   /*************************************************************************************/
   // LOGIC FOR USER INPUT
 
@@ -194,29 +190,27 @@ function App() {
   const handleUserInput = async (input) => {
     // Check if the input is a specific command
     if (input.toLowerCase().includes("add") || input.toLowerCase().includes("to queue")) {
-      const trackName = input.replace(/add to queue|add/i, '').trim();       // Extract the track name from the input
-      // Search for the track URI based on the user's input
+      const trackName = input.replace(/add to queue|add/i, '').trim();
       const trackUri = await searchForTrack(trackName, authToken);
       if (trackUri) {
-        await addToQueue(trackUri, authToken);         // Add to the queue without skipping tracks
+        await addToQueue(trackUri, authToken);
       } else {
-        console.error('Could not find the track to add to the queue');         // Handle the case where the track URI couldn't be found
+        console.error('Could not find the track to add to the queue');
       }
     } else {
       // Use NLP for more complex queries
       const trackUris = await interpretComplexQuery(input, authToken);
-      console.log('TRACK URIS: ', trackUris);
-
-      /*
+      console.log('Track URIs: ', trackUris);
+      
       if (trackUris.length > 0) {
         // Add all tracks to the queue
         for (const trackUri of trackUris) {
-          await addToQueue(trackUri, authToken); // Ensure addToQueue uses the authToken
+          await addToQueue(trackUri, authToken);
         }
       } else {
         console.error('No tracks found for the query');
       }
-      */
+      
     }
   };
 

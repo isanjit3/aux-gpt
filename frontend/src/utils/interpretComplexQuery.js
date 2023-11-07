@@ -1,14 +1,14 @@
-import { searchForTrack } from './searchForTrack';
 import axios from 'axios';
 
-//import openai from OpenAI();
-const OPENAI_API_KEY = process.env.REACT_APP_OPENAI_APIKEY
+import { searchForTrack } from './searchForTrack';
 
-// Function to interpret complex queries using GPT-3
+const OPENAI_API_KEY = process.env.REACT_APP_OPENAI_APIKEY;
+
+// Function to interpret complex queries using GPT-3.5-turbo
 const interpretComplexQuery = async (query, authToken) => {
+  const numSongs = 5;
   console.log('Asking ChatGPT!');
   try {
-    console.log("Entered try")
     let data = JSON.stringify({
       "model": "gpt-3.5-turbo",
       "messages": [
@@ -18,14 +18,10 @@ const interpretComplexQuery = async (query, authToken) => {
         },
         {
           "role": "user",
-          "content": `Interpret the following music-related query and suggest a list of 20 songs: "${query}"`
+          "content": `Interpret the following music-related query and suggest a list of ${numSongs} songs: "${query}". Just give the songs in the format song$$song$$song. Do not include anything else in your response.`
         }
       ]
     });
-
-    console.log('query: ', query)
-    console.log('data: ', data)
-    console.log(OPENAI_API_KEY)
 
     let config = {
       method: 'post',
@@ -38,47 +34,26 @@ const interpretComplexQuery = async (query, authToken) => {
       data: data
     };
 
-    console.log('config: ', config)
+    const response = await axios.request(config);
+    console.log(response.data);
 
-    axios.request(config)
-      .then((response) => {
-        console.log(response)
-        console.log(JSON.stringify(response.data));
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+    // parse the response to get the song titles
+    const songTitles = response.data.choices[0].message.content.split('$$');
+    
+    // search for each song and get the URIs
+    const trackUris = await Promise.all(songTitles.map(async (title) => {
+      return await searchForTrack(title, authToken);
+    }));
 
-    /*
-  const interpretedText = gptResponse.data.choices[0].text.trim();
-  console.log('Interpreted Text: ', interpretedText)
-  // Logic to parse the interpreted text and extract song titles or keywords
-  const songTitlesOrSearchTerms = parseInterpretedText(interpretedText);
+    // filter out any null URIs (in case some songs weren't found)
+    const validTrackUris = trackUris.filter(uri => uri !== null);
 
-  // Now search for each song or term and compile a list of track URIs
-  const trackUris = [];
-  for (const term of songTitlesOrSearchTerms) {
-    const trackUri = await searchForTrack(term, authToken);
-    if (trackUri) {
-      trackUris.push(trackUri);
-    }
-  }
+    return validTrackUris;
 
-  // Return the full list of track URIs to queue
-  return trackUris;
-  */
   } catch (error) {
     console.error('Error interpreting the complex query:', error);
     return [];
   }
 };
 
-// Dummy function to parse the interpreted text from GPT-3
-// This is a placeholder and should be replaced with actual logic to parse the text
-const parseInterpretedText = (interpretedText) => {
-  // Implement parsing logic based on the structure of the GPT-3 response
-  // For example, if GPT-3 returns a comma-separated list of song titles, split by commas
-  return interpretedText.split(',').map(title => title.trim());
-};
-
-export { interpretComplexQuery, parseInterpretedText };
+export { interpretComplexQuery };
