@@ -1,37 +1,72 @@
 import { searchForTrack } from './searchForTrack';
+import axios from 'axios';
 
-const OpenAI = require('openai-api');
-const openai = new OpenAI(process.env.REACT_APP_OPENAI_SECRET);
-
+//import openai from OpenAI();
+const OPENAI_API_KEY = process.env.REACT_APP_OPENAI_APIKEY
 
 // Function to interpret complex queries using GPT-3
 const interpretComplexQuery = async (query, authToken) => {
+  console.log('Asking ChatGPT!');
   try {
-    const gptResponse = await openai.complete({
-      engine: 'davinci',
-      prompt: `Interpret the following music-related query and suggest a list of 20 songs: "${query}"`,
-      maxTokens: 150,
-      n: 1,
-      stop: null,
-      temperature: 0.7,
+    console.log("Entered try")
+    let data = JSON.stringify({
+      "model": "gpt-3.5-turbo",
+      "messages": [
+        {
+          "role": "system",
+          "content": "You are a helpful assistant that will be the DJ"
+        },
+        {
+          "role": "user",
+          "content": `Interpret the following music-related query and suggest a list of 20 songs: "${query}"`
+        }
+      ]
     });
 
-    const interpretedText = gptResponse.data.choices[0].text.trim();
-    console.log('Interpreted Text: ', interpretedText)
-    // Logic to parse the interpreted text and extract song titles or keywords
-    const songTitlesOrSearchTerms = parseInterpretedText(interpretedText);
+    console.log('query: ', query)
+    console.log('data: ', data)
+    console.log(OPENAI_API_KEY)
 
-    // Now search for each song or term and compile a list of track URIs
-    const trackUris = [];
-    for (const term of songTitlesOrSearchTerms) {
-      const trackUri = await searchForTrack(term, authToken);
-      if (trackUri) {
-        trackUris.push(trackUri);
-      }
+    let config = {
+      method: 'post',
+      maxBodyLength: Infinity,
+      url: 'https://api.openai.com/v1/chat/completions',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${OPENAI_API_KEY}`
+      },
+      data: data
+    };
+
+    console.log('config: ', config)
+
+    axios.request(config)
+      .then((response) => {
+        console.log(response)
+        console.log(JSON.stringify(response.data));
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+
+    /*
+  const interpretedText = gptResponse.data.choices[0].text.trim();
+  console.log('Interpreted Text: ', interpretedText)
+  // Logic to parse the interpreted text and extract song titles or keywords
+  const songTitlesOrSearchTerms = parseInterpretedText(interpretedText);
+
+  // Now search for each song or term and compile a list of track URIs
+  const trackUris = [];
+  for (const term of songTitlesOrSearchTerms) {
+    const trackUri = await searchForTrack(term, authToken);
+    if (trackUri) {
+      trackUris.push(trackUri);
     }
+  }
 
-    // Return the full list of track URIs to queue
-    return trackUris;
+  // Return the full list of track URIs to queue
+  return trackUris;
+  */
   } catch (error) {
     console.error('Error interpreting the complex query:', error);
     return [];

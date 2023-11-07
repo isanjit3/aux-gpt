@@ -71,27 +71,48 @@ function App() {
       // Save the token in local storage and update the state
       localStorage.setItem('authToken', token);
       setAuthToken(token);
-      console.log(`Access Token Set: ${token}`)
+      // console.log(`Access Token Set: ${token}`)
       window.history.pushState("", document.title, window.location.pathname);
     }
   }, []);
 
   // Handlers for the Player component
   // Handler to toggle play/pause
-  const handlePlayPause = () => {
-    console.log('Play/Pause clicked')
-    axios.put(`https://api.spotify.com/v1/me/player/${isPlaying ? 'pause' : 'play'}`, {}, {
-      headers: {
-        'Authorization': `Bearer ${authToken}`
-      }
-    })
-      .then(response => {
-        setIsPlaying(!isPlaying); // Toggle the playing state
-      })
-      .catch(error => {
-        console.error('Error toggling play/pause', error);
+  const handlePlayPause = async () => {
+    console.log(`${isPlaying ? 'Pause' : 'Play'} clicked`);
+  
+    try {
+      // Check for active devices first
+      const devicesResponse = await axios.get('https://api.spotify.com/v1/me/player/devices', {
+        headers: {
+          'Authorization': `Bearer ${authToken}`
+        }
       });
+  
+      const devices = devicesResponse.data.devices;
+      const activeDevice = devices.find(device => device.is_active);
+  
+      if (!activeDevice) {
+        console.error('No active devices found');
+        return; // Exit the function if no active device is found
+      }
+  
+      // If there's an active device, send the play/pause request
+      const request = isPlaying ? 'pause' : 'play';
+      await axios.put(`https://api.spotify.com/v1/me/player/${request}`, {}, {
+        headers: {
+          'Authorization': `Bearer ${authToken}`
+        }
+      });
+  
+      // Toggle the playing state only after the request is successful
+      setIsPlaying(prevIsPlaying => !prevIsPlaying);
+    } catch (error) {
+      console.error('Error toggling play/pause', error);
+    }
   };
+  
+  
 
   // Handler to skip to the next track
   const handleSkipNext = () => {
@@ -184,6 +205,9 @@ function App() {
     } else {
       // Use NLP for more complex queries
       const trackUris = await interpretComplexQuery(input, authToken);
+      console.log('TRACK URIS: ', trackUris);
+
+      /*
       if (trackUris.length > 0) {
         // Add all tracks to the queue
         for (const trackUri of trackUris) {
@@ -192,6 +216,7 @@ function App() {
       } else {
         console.error('No tracks found for the query');
       }
+      */
     }
   };
 
