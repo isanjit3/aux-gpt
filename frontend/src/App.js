@@ -16,6 +16,7 @@ function App() {
   // const [currentPlaybackInfo, setCurrentPlaybackInfo] = useState(null); // Can remove this I think -- using currentTrack hook
   const [queue, setQueue] = useState([]);
   const [userInput, setUserInput] = useState('');
+  const [isPlaying, setIsPlaying] = useState(false);
 
   // Check for an existing auth token when the app loads
   useEffect(() => {
@@ -44,27 +45,53 @@ function App() {
   }, []);
   
   // Handlers for the Player component
+  // Handler to toggle play/pause
   const handlePlayPause = () => {
-    const isPlaying = true/* logic to determine if the song is currently playing */;
+    console.log('Play/Pause clicked')
     axios.put(`https://api.spotify.com/v1/me/player/${isPlaying ? 'pause' : 'play'}`, {}, {
       headers: {
         'Authorization': `Bearer ${authToken}`
       }
     })
     .then(response => {
-      // Update your state accordingly
+      setIsPlaying(!isPlaying); // Toggle the playing state
     })
     .catch(error => {
       console.error('Error toggling play/pause', error);
     });
   };
+  // Handler to skip to the next track
   const handleSkipNext = () => {
-    // Call Spotify API to skip to the next track
+    console.log('Skip next clicked')
+    axios.post('https://api.spotify.com/v1/me/player/next', {}, {
+      headers: {
+        'Authorization': `Bearer ${authToken}`
+      }
+    })
+    .then(response => {
+      fetchCurrentPlaying(); // Fetch the new current playing track
+    })
+    .catch(error => {
+      console.error('Error skipping to next track', error);
+    });
   };
+  // Handler to skip to the previous track
   const handleSkipPrevious = () => {
-    // Call Spotify API to skip to the previous track
+    console.log('Skip previous clicked')
+    axios.post('https://api.spotify.com/v1/me/player/previous', {}, {
+      headers: {
+        'Authorization': `Bearer ${authToken}`
+      }
+    })
+    .then(response => {
+      fetchCurrentPlaying(); // Fetch the new current playing track
+    })
+    .catch(error => {
+      console.error('Error skipping to previous track', error);
+    });
   };
   const handleScrub = (e) => {
+    console.log('Song scrubbed')
     const newPositionMs = 1000/* calculate position in milliseconds based on scrubber value */;
     axios.put(`https://api.spotify.com/v1/me/player/seek?position_ms=${newPositionMs}`, {}, {
       headers: {
@@ -133,7 +160,7 @@ function App() {
         <>
           <Player
             currentTrack={currentTrack}
-            onScrub={handleScrub}
+            Scrub={handleScrub}
             onPlayPause={handlePlayPause}
             onSkipNext={handleSkipNext}
             onSkipPrevious={handleSkipPrevious}
