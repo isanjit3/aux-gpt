@@ -2,6 +2,8 @@ import React from 'react';
 import './App.css';
 import { useEffect, useState } from "react";
 import axios from 'axios';
+import { ChakraProvider, Box } from '@chakra-ui/react';
+import theme from './theme';
 
 // components
 import Login from './components/Login';
@@ -18,7 +20,7 @@ import { clearQueue } from './utils/clearQueue';
 import { interpretComplexQuery } from './utils/interpretComplexQuery';
 
 
-const INTERVAL = 100;
+const INTERVAL = 5000;
 
 
 function App() {
@@ -144,6 +146,7 @@ function App() {
       });
   };
 
+  // Handler to change song position
   const handleScrub = (e) => {
     console.log('Song scrubbed')
     const newPositionMs = e;
@@ -215,23 +218,25 @@ function App() {
   };
 
   return (
-    <div>
-      {!authToken ? (
-        <Login />
-      ) : (
-        <>
-          <Player
-            currentTrack={currentTrack}
-            onScrub={handleScrub}
-            onPlayPause={handlePlayPause}
-            onSkipNext={handleSkipNext}
-            onSkipPrevious={handleSkipPrevious}
-          />
-          <ChatBox onSubmitPrompt={handleUserInput} />
-          <Queue queue={queue} />
-        </>
-      )}
-    </div>
+    <ChakraProvider theme={theme}>
+      <Box bg="gray.800" color="white" minH="100vh" p={10}>
+        {!authToken ? (
+          <Login />
+        ) : (
+          <>
+            <Player
+              currentTrack={currentTrack}
+              // onScrub={handleScrub}
+              onPlayPause={handlePlayPause}
+              onSkipNext={handleSkipNext}
+              onSkipPrevious={handleSkipPrevious}
+            />
+            <ChatBox onSubmitPrompt={handleUserInput} />
+            <Queue queue={queue} />
+          </>
+        )}
+      </Box>
+    </ChakraProvider>
   );
 }
 

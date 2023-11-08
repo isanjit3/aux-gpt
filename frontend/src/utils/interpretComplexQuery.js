@@ -4,13 +4,14 @@ import { searchForTrack } from './searchForTrack';
 
 const OPENAI_API_KEY = process.env.REACT_APP_OPENAI_APIKEY;
 
-// Function to interpret complex queries using GPT-3.5-turbo
+// Function to interpret complex queries using GPT-3.5-turbo or GPT-4
 const interpretComplexQuery = async (query, authToken) => {
   const numSongs = 5;
   console.log('Asking ChatGPT!');
   try {
     let data = JSON.stringify({
-      "model": "gpt-3.5-turbo",
+      // "model": "gpt-3.5-turbo",
+      "model": "gpt-4",
       "messages": [
         {
           "role": "system",

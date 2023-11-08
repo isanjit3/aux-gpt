@@ -1,4 +1,4 @@
-import React from 'react';
+import { List, ListItem, Text, Box } from '@chakra-ui/react';
 
 function Queue({ queue }) {
   //console.log(`Queue: ${queue}`);
@@ -6,16 +6,16 @@ function Queue({ queue }) {
   const displayQueue = queue.slice(0, 5);
 
   return (
-    <ul>
-      {displayQueue.map((track, index) => (
-        <li key={index}>
-          {track && track.name ? track.name : 'Unknown Track'} by{' '}
-          {track && track.artists 
-            ? track.artists.map((artist) => artist.name).join(', ') 
-            : 'Unknown Artist'}
-        </li>
-      ))}
-    </ul>
+    <Box padding="5" borderWidth="0px" borderRadius="lg" overflow="hidden">
+      <List spacing={3}>
+        {displayQueue.map((track, index) => (
+          <ListItem key={index} display="flex" justifyContent="space-between" alignItems="center">
+            <Text fontWeight="bold">{track.name}</Text>
+            <Text fontSize="sm">{track.artists.map((artist) => artist.name).join(', ')}</Text>
+          </ListItem>
+        ))}
+      </List>
+    </Box>
   );
 }
 

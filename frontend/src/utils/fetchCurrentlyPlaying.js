@@ -12,7 +12,7 @@ const fetchCurrentPlaying = async (setCurrentTrack, authToken) => {
             setCurrentTrack({
                 songTitle: response.data.item.name,
                 artist: response.data.item.artists.map(artist => artist.name).join(', '),
-                albumImageUrl: response.data.item.album.images[1].url, // can change size of album image url (will need to do this dynamically)
+                albumImageUrl: response.data.item.album.images[0].url, // can change size of album image url (will need to do this dynamically)
                 progressMs: response.data.progress_ms,
                 durationMs: response.data.item.duration_ms
             });
