@@ -6,7 +6,7 @@ function Player({ currentTrack, onSkipNext, onSkipPrevious }) {
   return (
     <Box bg="gray.800" color="white" p={4} rounded="md" shadow="md">
       <Flex align="center" justify="center" direction="column">
-        <Image boxSize="150px" src={currentTrack.albumImageUrl} alt="Album cover" />
+        <Image boxSize="10rem" src={currentTrack.albumImageUrl} alt="Album cover" />
         <Text fontSize="xl" fontWeight="bold" mt={4}>{currentTrack.songTitle}</Text>
         <Text fontSize="md">{currentTrack.artist}</Text>
         <Flex justify="center" mt={4}>
