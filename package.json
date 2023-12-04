@@ -1,0 +1,15 @@
+{
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
+  "scripts": {
+    "start": "concurrently \"yarn workspace aux-gpt-frontend start\" \"yarn workspace aux-gpt-backend start\"",
+    "build": "yarn workspace aux-gpt-frontend build",
+    "serve": "concurrently \"yarn workspace aux-gpt-frontend serve\" \"yarn workspace aux-gpt-backend start\""
+  },  
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

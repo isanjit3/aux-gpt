@@ -1,5 +1,5 @@
 {
-  "name": "aux-gpt",
+  "name": "aux-gpt-backend",
   "version": "1.0.0",
   "description": "",
   "main": "server.js",
