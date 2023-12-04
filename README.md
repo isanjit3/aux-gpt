@@ -54,11 +54,11 @@ See `.env.example` for more instructions on which variables you will need to add
 Once the app is running, log in with your Spotify account to start using AuxGPT. Type in commands like "play the latest album by Artist" or "add Song Name to queue" and watch AuxGPT work its magic.
 
 ## Contributing
-Contributions are what make the open-source community such an amazing place to learn, inspire, and create. Any contributions you make are greatly appreciated. See **[aux-gpt/CONTRIBUTING.md](`CONTRIBUTING.md`)** for more details on how you can contribute to this project.
+Contributions are what make the open-source community such an amazing place to learn, inspire, and create. Any contributions you make are greatly appreciated. See **[CONTRIBUTING.md](`aux-gpt/CONTRIBUTING.md`)** for more details on how you can contribute to this project.
 
 ## License
 
-Distributed under the MIT License. See **[LICENSE](`LICENSE`)** for more information.
+Distributed under the MIT License. See **[LICENSE](`aux-gpt/LICENSE`)** for more information.
 
 
 ## Contact
